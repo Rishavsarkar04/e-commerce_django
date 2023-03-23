@@ -1,0 +1,35 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Orders{% endblock title %}
+{% block main-content %}
+<div class="container my-5">
+ <div class="row">
+ <h3>Welcome {{request.user.username}} </h3>
+  <div class="col-sm-2 border-end">
+   <ul class="list-unstyled">
+    <li class="d-grid"><a href="{% url 'orders' %}" class="btn btn-primary">Orders</a></li>
+   </ul>
+  </div>
+ 
+  {% if exist %}
+
+  <div class="col-sm-9 offset-sm-1">
+    {% for order in orders %}
+   <div class="row">
+    <p>Order {{forloop.counter}} </p>
+    <div class="col-sm-3 text-left align-self-left"><img src="{{order.product.product_image.url}}" alt="" srcset="" class="img-fluid img-thumbnail shadow-sm" height="60" width="60"> </div>
+    <p> product : {{order.product.title}}</p>
+    <p> quantity : {{order.quantity}}</p>
+    <p> customer name : {{order.customer_name}}</p>
+    <p> order date: {{order.order_date}}</p>
+    <p> order status: {{order.status}}</p>
+    <hr>
+   </div>
+   {% endfor %}
+  {% else %}
+  <p class="text-center"> you don't have any orders here, go and place some orders</p>
+  {% endif %}
+</div>
+ </div>
+</div>
+{% endblock main-content %}

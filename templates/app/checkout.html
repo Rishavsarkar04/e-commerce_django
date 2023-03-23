@@ -1,0 +1,160 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% load filters %}
+{% block title %}Buy Now{% endblock title %}
+{% block main-content %}
+<div class="container">
+ <div class="row mt-5">
+  <div class="col-sm-6">
+    <h4>Order Summary</h4>
+    <hr>
+
+    {% if one_item %}
+
+    <div class="card mb-2">
+      <div class="card-body">
+        <h5>Product: {{items.product.title}}</h5>
+        <p>Quantity: {{items.quantity}}</p>
+        <p class="fw-bold">Price : {{items.total_cost}}</p>
+      </div>
+    </div>
+
+    {%else%}
+
+    {% for item in items %}
+      <div class="card mb-2">
+        <div class="card-body">
+          <h5>Product: {{item.product.title}}</h5>
+          <p>Quantity: {{item.quantity}}</p>
+          <p class="fw-bold">Price : {{item.total_cost}}</p>
+        </div>
+      </div>
+      {% endfor %}
+
+      {%endif%}
+
+      <p class ='fw-bold'> Total Amount + shipment charge(Rs.{{shipment_amount}}) = {{total_amount}} </p>
+    <small>Term and Condition: Lorem ipsum dolor sit amet consectetur adipisicing elit. Mollitia, ullam saepe! Iure optio repellat dolor velit, minus rem. Facilis cumque neque numquam laboriosam, accusantium adipisci nisi nihil in et quis?</small>
+  </div>
+  <div class="col-sm-4 offset-sm-1">
+    <h4>Select Shipping Address</h4>
+    <hr>
+
+    
+
+    <form action ='' method ='post' id = 'payform'>
+      {% for add in addresses %}
+      <div class="card">
+        <div class="card-body">
+        <h5>{{add.name}}</h5>
+        <p>{{add.locality}} , {{add.city}} , {{add.state}} , {{add.zipcode}} </p>
+        </div>
+      </div>
+        <div class="form-check mt-2 mb-5">
+          <input class="form-check-input" type="radio" name ='cusid' id='cusadd{{forloop.counter}}' value="{{add.id}}">
+          <label class="form-check-label fw-bold" for="customer-{{add.id}}">
+            Address: {{forloop.counter}} </label>
+        </div>
+        {%empty%}
+        <h7>there is no address saved, please save a address</h7>
+        {% endfor %}
+         <div class="text-end">
+          <button type="submit" id="rzp-button1" class="btn btn-warning mt-3 px-5 fw-bold">Continue</button>
+        </div> 
+      </form>
+
+      
+      {% if messages %}
+            <ul class="messages">
+          {% for message in messages %}
+          <p {% if message.tags %} class="alert alert-{{message.tags}} mt-4"{% endif %}>{{ message }}</p>
+          {% endfor %}
+          </ul>
+      {% endif %}
+    </div>
+  </div>
+</div>
+
+
+ {% comment %} Payment script {% endcomment %}
+
+ <script src="https://checkout.razorpay.com/v1/checkout.js"></script>
+<script>
+  var options = {
+    "key": "", // Enter the Key ID generated from the Dashboard
+    "amount": "{{pay_payment}}",
+    "currency": "INR",
+    'name':'shoppingly',
+    "description": "ecom",
+    "image": "https://s3.amazonaws.com/rzp-mobile/images/rzp.jpg",
+    "order_id":"{{order_id}}",
+    
+    config: {
+      display: {
+        blocks: {
+         
+          other: { //  name for other block
+            name: "Payment modes",
+            instruments: [
+              {
+                method: "card",
+              },
+              {
+                method: 'netbanking',
+              },
+              {
+                method: "upi"
+              }
+            ]
+          }
+        },
+        
+        sequence: [ "block.other"],
+        preferences: {
+          show_default_blocks: false // Should Checkout show its default blocks?
+        }
+      }
+    },
+
+"handler": function (response){
+  //alert(response.razorpay_payment_id);
+  //alert(response.razorpay_order_id);
+  //alert(response.razorpay_signature);
+      var form = document.getElementById('payform');
+        var url = '{% url 'payment_done' %}';
+        var cusid = form.elements["cusid"].value;
+
+        window.location.href = url +`?order_id=${response.razorpay_order_id}&payment_id=${response.razorpay_payment_id}&signature=${response.razorpay_signature}&cusid=${cusid}`;
+},
+"prefill": {
+  "name": "Gaurav Kumar",
+  "email": "gaurav.kumar@example.com",
+  "contact": "9000090000"
+},
+"notes": {
+  "address": "Razorpay Corporate Office"
+},
+"theme": {
+  "color": "#3399cc"
+}
+};
+var rzp1 = new Razorpay(options);
+rzp1.on('payment.failed', function (response){
+  alert(response.error.code);
+  alert(response.error.description);
+  alert(response.error.source);
+  alert(response.error.step);
+  alert(response.error.reason);
+  alert(response.error.metadata.order_id);
+  alert(response.error.metadata.payment_id);
+});
+document.getElementById('rzp-button1').onclick = function(e){
+
+      rzp1.open();
+      e.preventDefault();
+
+}
+</script>
+
+
+{% endblock main-content %}

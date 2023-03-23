@@ -1,0 +1,42 @@
+{% extends 'app/base.html' %}
+{% load static %}
+{% block title %}Address{% endblock title %}
+{% block main-content %}
+<div class="container my-5">
+ <div class="row">
+ <h3>Welcome {{request.user.username}}</h3>
+  <div class="col-sm-2 border-end">
+   <ul class="list-unstyled">
+    <li class="d-grid"><a href="{% url 'profile' %}" class="btn">Profile</a></li>
+    <li class="d-grid"><a href="{% url 'address' %}" class="btn {{active}}">Address</a></li>
+   </ul>
+  </div>
+
+
+  <div class="col-sm-9 offset-sm-1">
+   <div class="row">
+    {% if exist %}
+        {% for add in addresses%}
+        <div class="col-sm-6">
+        <div class="card mt-3">
+        <div class="card-body">
+        <h3>Address {{forloop.counter}}</h3>
+        <p>Name: {{add.name}}</p>
+        <p>city: {{add.city}}</p>
+        <p>State: {{add.state}}</p>
+        <div>
+            <a href="{% url 'edit_add' add.id %}" type="button" class="btn btn-info"> edit </a> 
+            <a href="{% url 'delete_add' add.id %}" type="button" class="btn btn-danger"> delete </a> 
+        </div>
+        </div>
+        </div>
+        </div>
+        {% endfor %}
+   {% else %}
+   <p>you don't have any address saved , so add a customer address.</p>
+   {% endif %}
+   </div>
+  </div>
+ </div>
+</div>
+{% endblock main-content %}
